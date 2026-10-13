@@ -56,7 +56,7 @@ class GeminiClient(LLMClient):
             })
 
         url = self.endpoint.format(model=model)
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.post(url, params={"key": self.api_key}, json=payload)
             if resp.status_code == 200:
                 data = resp.json()
