@@ -8,9 +8,9 @@ from backend.config import GEMINI_API_KEY, GEMINI_MODEL, GROQ_API_KEY, GROQ_MODE
 
 # Danh sách model Gemini thử theo thứ tự ưu tiên (cho new users)
 GEMINI_MODELS = [
+    "gemini-3.8-flash",
     "gemini-3.5-flash-lite",
     "gemini-flash-lite-latest",
-    "gemini-3.8-flash",
     "gemini-pro-latest",
 ]
 
@@ -26,7 +26,7 @@ class GeminiClient(LLMClient):
         self.preferred_model = GEMINI_MODEL or "gemini-3.5-flash-lite"
         self.endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
-    async def _try_gemini(self, model, messages, temperature, max_tokens):
+    async def _try_gemini(self, model, messages, temperature, max_tokens, system_user_msg=None):
         """Thử 1 model Gemini. Trả về text hoặc None nếu lỗi."""
         payload = {
             "contents": [],
@@ -43,9 +43,15 @@ class GeminiClient(LLMClient):
             ],
         }
 
-        for msg in messages:
+        # Gemini API chưa hỗ trợ role="system" trong contents — đổi hết về user/model
+        msgs = list(messages)
+        if system_user_msg and msgs:
+            msgs = [dict(msgs[0], content=system_user_msg["content"] + msgs[0]["content"])] + msgs[1:]
+
+        for msg in msgs:
+            role = msg["role"] if msg["role"] in ("user", "model") else "user"
             payload["contents"].append({
-                "role": msg["role"],
+                "role": role,
                 "parts": [{"text": msg["content"]}]
             })
 
@@ -85,8 +91,11 @@ class GeminiClient(LLMClient):
             return None
 
     async def chat(self, system, messages, temperature=0.3, max_tokens=300):
-        # Thêm system prompt vào đầu messages
-        full_messages = [{"role": "system", "content": system}] + messages
+        # Chuyển system prompt vào user turn đầu (Gemini API chưa nhận role="system")
+        system_user_msg = {
+            "role": "user",
+            "content": f"(Hướng dẫn hành xử của bạn: {system})\n\n---\n\n",
+        }
 
         # Thử model ưu tiên trước
         if self.preferred_model in GEMINI_MODELS:
@@ -94,18 +103,25 @@ class GeminiClient(LLMClient):
         else:
             models_to_try = GEMINI_MODELS
 
-        for model in models_to_try:
-            try:
-                result = await self._try_gemini(model, messages, temperature, max_tokens)
-                if result:
-                    return result
-            except (httpx.TimeoutException, httpx.ConnectError):
-                continue  # Thử model tiếp theo
-            except Exception:
-                continue
+        for attempt in range(2):  # 2 vòng: vòng 2 retry các model bị 503
+            for model in models_to_try:
+                try:
+                    result = await self._try_gemini(
+                        model, messages, temperature, max_tokens, system_user_msg
+                    )
+                    if result:
+                        return result
+                except (httpx.TimeoutException, httpx.ConnectError):
+                    continue  # Thử model tiếp theo
+                except Exception:
+                    continue
+            if attempt == 0:
+                import asyncio
+                await asyncio.sleep(2)  # Chờ 2s trước khi retry
 
         # Fallback sang Groq
-        groq_result = await self._try_groq(full_messages, temperature, max_tokens)
+        groq_messages = [{"role": "system", "content": system}] + messages
+        groq_result = await self._try_groq(groq_messages, temperature, max_tokens)
         if groq_result:
             return groq_result
 
