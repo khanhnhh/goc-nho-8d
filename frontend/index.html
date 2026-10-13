@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Góc nhỏ 8D — Người bạn đồng hành</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="/static/manifest.json">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="header-content">
+                <h1>Góc nhỏ 8D</h1>
+                <p class="subtitle">Người bạn đồng hành của bạn</p>
+            </div>
+            <div class="emergency-banner">
+                Đang cần giúp gấp? <a href="tel:111">Gọi 111</a> — miễn phí, 24/7
+            </div>
+        </header>
+
+        <main class="chat-container">
+            <div id="messages" class="messages">
+                <!-- Tin nhắn sẽ được thêm vào đây -->
+            </div>
+        </main>
+
+        <footer class="input-container">
+            <div class="input-wrapper">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="Nhắn gì đó cho mình..." 
+                    rows="1"
+                    maxlength="500"
+                ></textarea>
+                <button id="sendBtn" class="send-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="mood-checkin">
+                <span>Hôm nay bạn thế nào?</span>
+                <div class="mood-buttons">
+                    <button class="mood-btn" data-level="1" title="Rất buồn">😢</button>
+                    <button class="mood-btn" data-level="2" title="Buồn">😟</button>
+                    <button class="mood-btn" data-level="3" title="Bình thường">😐</button>
+                    <button class="mood-btn" data-level="4" title="Vui">😊</button>
+                    <button class="mood-btn" data-level="5" title="Rất vui">😄</button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/static/js/chat.js"></script>
+</body>
+</html>

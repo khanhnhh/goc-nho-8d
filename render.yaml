@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: goc-nho-8d
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: TEACHER_EMAIL
+        value: demo@thcshungchinh.edu.vn
+      - key: TEACHER_ZALO_WEBHOOK
+        value: ""
+      - key: SESSION_TTL_DAYS
+        value: "30"

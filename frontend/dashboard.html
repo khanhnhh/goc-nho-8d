@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard GVCN — Góc nhỏ 8D</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard">
+        <header>
+            <h1>📊 Dashboard GVCN — Góc nhỏ 8D</h1>
+            <p class="subtitle">Báo cáo tổng hợp tuần (ẩn danh)</p>
+        </header>
+
+        <main>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="activeSessions">—</div>
+                    <div class="stat-label">Phiên hoạt động</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💬</div>
+                    <div class="stat-value" id="messageCount">—</div>
+                    <div class="stat-label">Tin nhắn</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🛡️</div>
+                    <div class="stat-value" id="blockedCount">—</div>
+                    <div class="stat-label">Lần chặn</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-value" id="period">—</div>
+                    <div class="stat-label">Thời gian</div>
+                </div>
+            </div>
+
+            <section class="info-section">
+                <h2>📋 Hướng dẫn sử dụng</h2>
+                <ul>
+                    <li><strong>Phiên hoạt động:</strong> Số học sinh đã trò chuyện trong tuần (ẩn danh).</li>
+                    <li><strong>Tin nhắn:</strong> Tổng số tin nhắn được trao đổi.</li>
+                    <li><strong>Lần chặn:</strong> Số lần bot chặn câu trả lời không an toàn — chỉ số chất lượng guardrails.</li>
+                    <li><strong>Cảnh báo khủng hoảng:</strong> Kiểm tra email/Zalo để xem cảnh báo chi tiết (mức độ + thời gian, không có nội dung).</li>
+                </ul>
+            </section>
+
+            <section class="info-section">
+                <h2>🔒 Nguyên tắc ẩn danh</h2>
+                <p>Dashboard chỉ hiển thị số liệu tổng hợp. Không có thông tin cá nhân, không biết em nào là em nào. Dữ liệu phiên tự xóa sau 30 ngày.</p>
+            </section>
+
+            <section class="info-section">
+                <h2>⚠️ Khi có cảnh báo khủng hoảng</h2>
+                <ol>
+                    <li>Kiểm tra email/Zalo để biết mức độ và thời gian.</li>
+                    <li>Chủ động lên lớp, quan sát học sinh — không truy tìm cá nhân.</li>
+                    <li>Nhắc chung cả lớp về tổng đài 111 nếu cần.</li>
+                    <li>Nếu cần hỗ trợ chuyên sâu, liên hệ chuyên gia tâm lý học đường.</li>
+                </ol>
+            </section>
+        </main>
+
+        <footer>
+            <p>Góc nhỏ 8D — Phiên bản 1.0 | Sáng kiến CN03 — Nguyễn Thị Mỹ Dung, THCS Hưng Chính</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

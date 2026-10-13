@@ -1,0 +1,18 @@
+# Danh sách từ/cụm từ cấm xuất hiện trong câu trả lời của bot
+# (sau khi AI trả lời, lớp 3 sẽ chặn nếu dính)
+
+bị trầm cảm
+rối loạn lo âu
+rối loạn tâm thần
+bị điên
+bị tâm thần
+uống thuốc paracetamol
+uống thuốc ngủ
+dùng dao cứa
+dùng dây thừng
+thuốc an thần
+thuốc chống trầm cảm
+bác sĩ tâm thần
+viện tâm thần
+trầm cảm nặng
+lo âu nặng
