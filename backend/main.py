@@ -1,6 +1,7 @@
 """
 FastAPI backend — trái tim của hệ thống, điều phối 4 lớp phòng thủ.
 """
+import re
 import uuid
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
