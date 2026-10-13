@@ -16,15 +16,23 @@ def normalize_text(text: str) -> str:
     Ví dụ: "gieest nguoif" → "giet nguoi"
     """
     text = text.lower()
-    
+
+    # Xóa chữ cái lặp TRƯỚC (Telex double: ee→e, oo→o)
+    # Nhưng giữ nguyên nếu là phần tone mark
+    text = re.sub(r'([a-z])\1', r'\1', text)
+
     # Bỏ dấu Unicode
     text = unicodedata.normalize('NFD', text)
     text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
-    
-    # Xóa chữ cái lặp (Telex: gieest→giet, nguoif→nguoi)
+
+    # Bỏ Telex tone marks ở cuối từ: f, s, r, x, j (sắc, huyền, hỏi, ngã, nặng)
+    # Chỉ bỏ khi nó đứng CUỐI một từ (không phải đầu, tránh false positive)
+    text = re.sub(r'([a-z])([fsrxj])(?=\s|$)', r'\1', text)
+
+    # Xóa chữ cái lặp SAU khi đã bỏ tone mark (Telex double: gieest→giest→giet)
     text = re.sub(r'([a-z])\1', r'\1', text)
+
     text = re.sub(r'\s+', ' ', text).strip()
-    
     return text
 
 
@@ -61,6 +69,12 @@ def detect_crisis(text: str) -> int:
     ]):
         return 2
     if any(kw in text_norm for kw in CRITICAL_KW):
+        return 2
+    # Telex check — các từ bị lỗi khi bỏ dấu + double removal
+    if any(kw in text_norm for kw in [
+        "giest nguoi", "giest ngoi", "giet nguoi", "giet ngoi",
+        "mon chet", "muon chet", "giet",
+    ]):
         return 2
 
     # Mức 1
