@@ -189,6 +189,12 @@ async def root():
     return FileResponse(BASE_DIR / "frontend" / "index.html")
 
 
+@app.get("/dashboard.html")
+async def dashboard():
+    """Dashboard GVCN — thống kê tuần."""
+    return FileResponse(BASE_DIR / "frontend" / "dashboard.html")
+
+
 @app.get("/dashboard")
 async def dashboard():
     """Dashboard cho GVCN."""
