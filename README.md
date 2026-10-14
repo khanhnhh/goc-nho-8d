@@ -1,4 +1,4 @@
-﻿# Ngườ bạn nhỏ AI — Chatbot hỗ trợ tâm lý ẩn danh
+﻿# Người bạn nhỏ AI — Chatbot hỗ trợ tâm lý ẩn danh
 
 > Demo kỹ thuật cho sáng kiến CN03 — "Thiết kế Chatbot AI nhằm tăng cường hỗ trợ tâm lý và điều chỉnh hành vi cho học sinh lớp 8" của cô Nguyễn Thị Mỹ Dung, THCS Hưng Chính.
 

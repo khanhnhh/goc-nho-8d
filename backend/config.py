@@ -35,7 +35,7 @@ SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 EMAIL_FROM = os.getenv("EMAIL_FROM")
 
 # App
-APP_NAME = os.getenv("APP_NAME", "Ngườ bạn nhỏ AI")
+APP_NAME = os.getenv("APP_NAME", "Người bạn nhỏ AI")
 
 # Session
 SESSION_TTL_DAYS = int(os.getenv("SESSION_TTL_DAYS", "30"))

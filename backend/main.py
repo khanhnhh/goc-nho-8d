@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Ngườ bạn nhỏ AI — Chatbot hỗ trợ tâm lý",
+    title="Người bạn nhỏ AI — Chatbot hỗ trợ tâm lý",
     description="Chatbot ẩn danh hỗ trợ tâm lý cho học sinh lớp 8",
     version="1.0.0",
     lifespan=lifespan,
@@ -185,7 +185,7 @@ async def stats():
 @app.get("/health")
 async def health():
     """Health check."""
-    return {"status": "ok", "service": "Ngườ bạn nhỏ AI"}
+    return {"status": "ok", "service": "Người bạn nhỏ AI"}
 
 
 # Serve frontend

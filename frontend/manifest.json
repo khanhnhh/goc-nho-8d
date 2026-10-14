@@ -1,6 +1,6 @@
 {
-  "name": "Ngườ bạn nhỏ AI",
-  "short_name": "Ngườ bạn nhỏ",
+  "name": "Người bạn nhỏ AI",
+  "short_name": "Người bạn nhỏ",
   "description": "Chatbot hỗ trợ tâm lý ẩn danh cho học sinh lớp 8",
   "start_url": "/",
   "display": "standalone",
