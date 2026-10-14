@@ -1,4 +1,4 @@
-# Góc nhỏ 8D — Chatbot hỗ trợ tâm lý ẩn danh
+﻿# Ngườ bạn nhỏ AI — Chatbot hỗ trợ tâm lý ẩn danh
 
 > Demo kỹ thuật cho sáng kiến CN03 — "Thiết kế Chatbot AI nhằm tăng cường hỗ trợ tâm lý và điều chỉnh hành vi cho học sinh lớp 8" của cô Nguyễn Thị Mỹ Dung, THCS Hưng Chính.
 
@@ -36,7 +36,7 @@ Mở trình duyệt: http://localhost:8000
 ## Cấu trúc dự án
 
 ```
-goc-nho-8d/
+nguoi-ban-nho-ai/
 ├── backend/
 │   ├── main.py                 # FastAPI — điều phối 4 lớp phòng thủ
 │   ├── config.py               # Đọc .env, load prompts và từ khóa

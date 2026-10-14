@@ -25,10 +25,12 @@ from backend.storage.sessions import (
     append_message,
     get_recent_messages,
     log_blocked,
+    log_crisis_alert,
     get_weekly_stats,
     cleanup_old_sessions,
 )
 from backend.notify.teacher import notify_teacher
+from backend.api.alerts import router as alerts_router
 
 
 @asynccontextmanager
@@ -40,11 +42,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Góc nhỏ 8D — Chatbot hỗ trợ tâm lý",
+    title="Ngườ bạn nhỏ AI — Chatbot hỗ trợ tâm lý",
     description="Chatbot ẩn danh hỗ trợ tâm lý cho học sinh lớp 8",
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app.include_router(alerts_router)
 
 
 # ============ MODELS ============
@@ -95,6 +99,11 @@ async def chat(req: ChatRequest):
         # KHÔNG gọi LLM — trả template cố định + cảnh báo GVCN
         alert = format_teacher_alert(crisis_level, session_id)
         await notify_teacher(alert)
+
+        # Lưu cảnh báo vào DB để dashboard GVCN xem lại
+        await log_crisis_alert(
+            session_id, crisis_level, alert["level_name"], alert["message"]
+        )
         
         # Lưu vào DB
         await get_or_create_session(session_id)
@@ -176,7 +185,7 @@ async def stats():
 @app.get("/health")
 async def health():
     """Health check."""
-    return {"status": "ok", "service": "Góc nhỏ 8D"}
+    return {"status": "ok", "service": "Ngườ bạn nhỏ AI"}
 
 
 # Serve frontend

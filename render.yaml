@@ -1,6 +1,6 @@
-services:
+﻿services:
   - type: web
-    name: goc-nho-8d
+    name: nguoi-ban-nho-ai
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT

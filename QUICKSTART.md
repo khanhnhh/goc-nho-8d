@@ -1,9 +1,9 @@
-# Khởi động nhanh
+﻿# Khởi động nhanh
 
 ## Cài đặt (1 lần)
 
 ```bash
-cd goc-nho-8d
+cd nguoi-ban-nho-ai
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt

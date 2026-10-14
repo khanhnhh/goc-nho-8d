@@ -26,7 +26,16 @@ GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 # Teacher
 TEACHER_EMAIL = os.getenv("TEACHER_EMAIL", "teacher@example.com")
+TEACHER_EMAILS = [e.strip() for e in os.getenv("TEACHER_EMAILS", TEACHER_EMAIL).split(",") if e.strip()]
 TEACHER_ZALO_WEBHOOK = os.getenv("TEACHER_ZALO_WEBHOOK")
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+EMAIL_FROM = os.getenv("EMAIL_FROM")
+
+# App
+APP_NAME = os.getenv("APP_NAME", "Ngườ bạn nhỏ AI")
 
 # Session
 SESSION_TTL_DAYS = int(os.getenv("SESSION_TTL_DAYS", "30"))

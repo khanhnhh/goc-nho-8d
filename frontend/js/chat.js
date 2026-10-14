@@ -13,7 +13,7 @@ const sendBtn = document.getElementById('sendBtn');
 // Khởi tạo
 document.addEventListener('DOMContentLoaded', () => {
     loadHistory();
-    addBotMessage('Chào bạn! Mình là Góc nhỏ 8D. Bạn hôm nay thế nào? Kể cho mình nghe đi, mình đang lắng nghe đây. 😊');
+    addBotMessage('Chào bạn! Mình là Ngườ bạn nhỏ AI. Bạn hôm nay thế nào? Kể cho mình nghe đi, mình đang lắng nghe đây. 😊');
 });
 
 // Gửi tin nhắn

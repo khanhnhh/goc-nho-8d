@@ -1,4 +1,4 @@
-"""
+﻿"""
 Mock LLM thông minh - trả lời đa dạng theo ngữ cảnh hội thoại.
 """
 import random
@@ -77,7 +77,7 @@ class MockLLM(LLMClient):
         
         # Jailbreak protection
         if any(kw in text for kw in ["bỏ vai trò", "giả sử bạn là", "ignore previous"]):
-            return "Mình không thể thay đổi vai trò. Mình là Góc nhỏ 8D - người bạn đồng hành của em. Em có muốn kể chuyện gì không? "
+            return "Mình không thể thay đổi vai trò. Mình là Ngườ bạn nhỏ AI - người bạn đồng hành của em. Em có muốn kể chuyện gì không? "
         
         # Classify and respond
         topic = self._classify_topic(text)

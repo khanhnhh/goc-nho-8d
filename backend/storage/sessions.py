@@ -45,7 +45,28 @@ async def init_db():
                 timestamp TEXT NOT NULL
             )
         """)
-        
+
+        # Bảng cảnh báo khủng hoảng — lưu lịch sử để dashboard xem
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS crisis_alerts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id TEXT NOT NULL,
+                level INTEGER NOT NULL,
+                level_name TEXT NOT NULL,
+                message TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+        """)
+
+        # Bảng email nhận cảnh báo — quản lý qua dashboard
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS alert_emails (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT UNIQUE NOT NULL,
+                created_at TEXT NOT NULL
+            )
+        """)
+
         await db.commit()
 
 
@@ -109,6 +130,36 @@ async def log_blocked(session_id: str, reason: str):
         await db.commit()
 
 
+async def log_crisis_alert(session_id: str, level: int, level_name: str, message: str):
+    """Lưu cảnh báo khủng hoảng vào DB."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            "INSERT INTO crisis_alerts (session_id, level, level_name, message, timestamp) VALUES (?, ?, ?, ?, ?)",
+            (session_id, level, level_name, message, datetime.now().isoformat())
+        )
+        await db.commit()
+
+
+async def get_recent_alerts(limit: int = 20) -> list[dict]:
+    """Lấy danh sách cảnh báo gần đây (ẩn danh)."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute(
+            "SELECT session_id, level, level_name, message, timestamp FROM crisis_alerts ORDER BY id DESC LIMIT ?",
+            (limit,)
+        )
+        rows = await cursor.fetchall()
+        return [
+            {
+                "session_id": r[0][:12] + "...",
+                "level": r[1],
+                "level_name": r[2],
+                "message": r[3],
+                "timestamp": r[4],
+            }
+            for r in rows
+        ]
+
+
 async def get_weekly_stats() -> dict:
     """Tổng hợp thống kê tuần cho dashboard GVCN."""
     week_ago = (datetime.now() - timedelta(days=7)).isoformat()
@@ -146,8 +197,35 @@ async def get_weekly_stats() -> dict:
 async def cleanup_old_sessions():
     """Xóa phiên cũ hơn TTL."""
     cutoff = (datetime.now() - timedelta(days=SESSION_TTL_DAYS)).isoformat()
-    
+
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("DELETE FROM messages WHERE session_id IN (SELECT session_id FROM sessions WHERE last_active < ?)", (cutoff,))
         await db.execute("DELETE FROM sessions WHERE last_active < ?", (cutoff,))
+        await db.commit()
+
+
+# ============ ALERT EMAILS ============
+
+async def get_alert_emails() -> list[str]:
+    """Lấy danh sách email nhận cảnh báo."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute("SELECT email FROM alert_emails ORDER BY created_at")
+        rows = await cursor.fetchall()
+        return [r[0] for r in rows]
+
+
+async def add_alert_email(email: str):
+    """Thêm email nhận cảnh báo."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            "INSERT OR IGNORE INTO alert_emails (email, created_at) VALUES (?, ?)",
+            (email, datetime.now().isoformat())
+        )
+        await db.commit()
+
+
+async def remove_alert_email(email: str):
+    """Xóa email nhận cảnh báo."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("DELETE FROM alert_emails WHERE email = ?", (email,))
         await db.commit()
