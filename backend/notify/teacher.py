@@ -1,5 +1,5 @@
 """
-Thông báo cho GVCN — email qua Brevo API (HTTP) hoặc webhook Zalo.
+Thông báo cho GVCN — email qua Brevo API (HTTP).
 """
 import asyncio
 import sys
@@ -8,7 +8,6 @@ from datetime import datetime, timezone, timedelta
 from backend.config import (
     TEACHER_EMAIL,
     TEACHER_EMAILS,
-    TEACHER_ZALO_WEBHOOK,
     BREVO_API_KEY,
     EMAIL_FROM,
     APP_NAME,
@@ -38,8 +37,7 @@ def get_email_logs() -> list[dict]:
 
 async def notify_teacher(alert: dict):
     """
-    Gửi cảnh báo khủng hoảng cho GVCN.
-    Ưu tiên: Brevo API → Webhook Zalo → Console log.
+    Gửi cảnh báo khủng hoảng cho GVCN qua email (Brevo API).
     """
     # Force UTF-8 cho console Windows (cp1252 không hỗ trợ tiếng Việt + emoji)
     try:
@@ -81,30 +79,6 @@ async def notify_teacher(alert: dict):
             _add_log("MOCK", f"Gui email toi {email}: {alert['message']}")
         print(f"       ⚠️  CHUA CO BREVO_API_KEY — can them BREVO_API_KEY vao file .env")
         _add_log("MOCK", "CHUA CO BREVO_API_KEY — can them BREVO_API_KEY vao file .env")
-
-    # 2. Gửi webhook Zalo (nếu có URL thật) — cũng chạy nền
-    if TEACHER_ZALO_WEBHOOK and TEACHER_ZALO_WEBHOOK.startswith("http"):
-        async def _send_zalo():
-            try:
-                async with httpx.AsyncClient() as client:
-                    resp = await client.post(TEACHER_ZALO_WEBHOOK, json=alert, timeout=5.0)
-                    if resp.status_code == 200:
-                        print(f"[OK] Da gui webhook Zalo")
-                        _add_log("OK", "Da gui webhook Zalo")
-                    else:
-                        print(f"[ERROR] Webhook Zalo tra ve {resp.status_code}")
-                        _add_log("ERROR", f"Webhook Zalo tra ve {resp.status_code}")
-            except Exception as e:
-                print(f"[ERROR] Khong gui duoc webhook Zalo: {e}")
-                _add_log("ERROR", f"Khong gui duoc webhook Zalo: {e}")
-
-        asyncio.create_task(_send_zalo())
-    elif TEACHER_ZALO_WEBHOOK:
-        print(f"[MOCK] Gui webhook Zalo: {TEACHER_ZALO_WEBHOOK}")
-        _add_log("MOCK", f"Gui webhook Zalo: {TEACHER_ZALO_WEBHOOK}")
-    else:
-        print(f"[MOCK] Gui webhook Zalo: CHUA CAU HINH — can them TEACHER_ZALO_WEBHOOK vao file .env")
-        _add_log("MOCK", "CHUA CAU HINH Zalo webhook")
 
 
 async def _send_brevo_email(alert: dict, to_email: str):

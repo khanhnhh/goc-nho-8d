@@ -13,7 +13,5 @@
         value: gemini-3.5-flash-lite
       - key: TEACHER_EMAIL
         value: demo@thcshungchinh.edu.vn
-      - key: TEACHER_ZALO_WEBHOOK
-        value: ""
       - key: SESSION_TTL_DAYS
         value: "30"
