@@ -29,7 +29,7 @@ from backend.storage.sessions import (
     get_weekly_stats,
     cleanup_old_sessions,
 )
-from backend.notify.teacher import notify_teacher
+from backend.notify.teacher import notify_teacher, get_email_logs
 from backend.api.alerts import router as alerts_router
 
 
@@ -180,6 +180,12 @@ async def chat(req: ChatRequest):
 async def stats():
     """Thống kê tuần cho dashboard GVCN."""
     return await get_weekly_stats()
+
+
+@app.get("/api/email-logs")
+async def email_logs():
+    """L?y log g?i email g?n d�y."""
+    return {"logs": get_email_logs()}
 
 
 @app.get("/health")

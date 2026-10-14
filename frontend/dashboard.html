@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard GVCN — Người bạn nhỏ AI</title>
+    <title>Ngườ bạn nhỏ AI — Báo cáo tổng hợp</title>
     <link rel="stylesheet" href="/static/css/dashboard.css">
     <style>
         .email-section {
@@ -124,12 +124,48 @@
             padding: 24px;
             font-style: italic;
         }
+        .log-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .log-section h2 {
+            margin-top: 0;
+            color: #1a1a2e;
+            font-size: 1.2rem;
+        }
+        .log-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .log-list li {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+        .log-list li:last-child {
+            border-bottom: none;
+        }
+        .log-list .log-ok {
+            color: #27ae60;
+        }
+        .log-list .log-error {
+            color: #e74c3c;
+        }
+        .log-list .log-mock {
+            color: #f39c12;
+        }
     </style>
 </head>
 <body>
     <div class="dashboard">
         <header>
-            <h1>📊 Dashboard GVCN — Người bạn nhỏ AI</h1>
+            <h1>📊 Ngườ bạn nhỏ AI — Báo cáo tổng hợp</h1>
             <p class="subtitle">Báo cáo tổng hợp tuần (ẩn danh)</p>
         </header>
 
@@ -178,6 +214,14 @@
                 </ul>
             </section>
 
+            <!-- Log gửi email -->
+            <section class="log-section">
+                <h2>📨 Log gửi email</h2>
+                <ul class="log-list" id="emailLogList">
+                    <li class="empty-state">Đang tải...</li>
+                </ul>
+            </section>
+
             <section class="info-section">
                 <h2>📋 Hướng dẫn sử dụng</h2>
                 <ul>
@@ -205,7 +249,7 @@
         </main>
 
         <footer>
-            <p>Người bạn nhỏ AI — Phiên bản 1.0 | Sáng kiến CN03 — Nguyễn Thị Mỹ Dung, THCS Hưng Chính</p>
+            <p>Ngườ bạn nhỏ AI — Phiên bản 1.0 | Sáng kiến CN03 — Nguyễn Thị Mỹ Dung, THCS Hưng Chính</p>
         </footer>
     </div>
 
@@ -289,9 +333,32 @@
                 });
         }
 
+        // Load email logs
+        function loadEmailLogs() {
+            fetch('/api/email-logs')
+                .then(r => r.json())
+                .then(data => {
+                    const list = document.getElementById('emailLogList');
+                    if (!data.logs || data.logs.length === 0) {
+                        list.innerHTML = '<li class="empty-state">Chưa có log nào</li>';
+                        return;
+                    }
+                    list.innerHTML = data.logs.map(log => `
+                        <li class="${log.status === 'OK' ? 'log-ok' : log.status === 'ERROR' ? 'log-error' : 'log-mock'}">
+                            [${log.time}] ${log.message}
+                        </li>
+                    `).join('');
+                })
+                .catch(() => {
+                    document.getElementById('emailLogList').innerHTML = '<li class="empty-state">Không tải được log</li>';
+                });
+        }
+
         loadEmails();
         loadAlerts();
+        loadEmailLogs();
         setInterval(loadAlerts, 30000); // Refresh mỗi 30s
+        setInterval(loadEmailLogs, 10000); // Refresh log mỗi 10s
     </script>
 </body>
 </html>
