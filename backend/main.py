@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Người bạn nhỏ AI — Chatbot hỗ trợ tâm lý",
+    title="Ngườ bạn nhỏ AI — Chatbot hỗ trợ tâm lý",
     description="Chatbot ẩn danh hỗ trợ tâm lý cho học sinh lớp 8",
     version="1.0.0",
     lifespan=lifespan,
@@ -138,7 +138,7 @@ async def chat(req: ChatRequest):
         )
     except Exception as e:
         # Fallback nếu LLM lỗi
-        response = "Xin lỗi, mình đang gặp sự cố kỹ thuật. Em thử nhắn lại sau nhé, hoặc nói chuyện với cô Dung hay người lớn em tin cậy."
+        response = "Xin lỗi, mình đang gặp sự cố kỹ thuật. Em thử nhắn lại sau nhé, hoặc nói chuyện với cô Dung hay ngườ lớn em tin cậy."
         await log_blocked(session_id, f"LLM error: {str(e)}")
     
     # === LỚP 3: Output validation ===
@@ -184,14 +184,14 @@ async def stats():
 
 @app.get("/api/email-logs")
 async def email_logs():
-    """L?y log g?i email g?n d�y."""
+    """Lấy log gửi email gần đây."""
     return {"logs": get_email_logs()}
 
 
 @app.get("/health")
 async def health():
     """Health check."""
-    return {"status": "ok", "service": "Người bạn nhỏ AI"}
+    return {"status": "ok", "service": "Ngườ bạn nhỏ AI"}
 
 
 # Serve frontend
