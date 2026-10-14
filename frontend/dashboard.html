@@ -171,6 +171,68 @@
             max-width: 150px;
             height: auto;
             margin-top: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .qr-code:hover {
+            transform: scale(1.05);
+        }
+        .qr-actions {
+            margin-top: 10px;
+        }
+        .qr-actions button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 14px;
+        }
+        .qr-actions button:hover {
+            background: #2980b9;
+        }
+        /* Modal popup */
+        .qr-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .qr-modal.active {
+            display: flex;
+        }
+        .qr-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .qr-modal-content img {
+            width: 300px;
+            height: 300px;
+        }
+        .qr-modal-close {
+            margin-top: 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .qr-modal-close:hover {
+            background: #c0392b;
         }
     </style>
 </head>
@@ -264,12 +326,80 @@
             <p>NgườI bạn nhỏ AI — Phiên bản 1.0 | Sáng kiến CN03 — Nguyễn Thị Mỹ Dung, THCS Hưng Chính</p>
             <div class="qr-section">
                 <p>Quét QR để vào trang chat:</p>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://nguoibannho.onrender.com" alt="QR Code" class="qr-code">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://nguoibannho.onrender.com" alt="QR Code" class="qr-code" id="qrImage" onclick="openQrModal()">
+                <div class="qr-actions">
+                    <button onclick="downloadQr()">📥 Tải xuống</button>
+                    <button onclick="shareQr()">📤 Chia sẻ</button>
+                </div>
             </div>
         </footer>
     </div>
 
+    <!-- QR Modal Popup -->
+    <div class="qr-modal" id="qrModal" onclick="closeQrModal(event)">
+        <div class="qr-modal-content" onclick="event.stopPropagation()">
+            <h3>📱 Quét QR để vào trang chat</h3>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://nguoibannho.onrender.com" alt="QR Code Large">
+            <p><small>https://nguoibannho.onrender.com</small></p>
+            <button class="qr-modal-close" onclick="closeQrModal()">Đóng</button>
+        </div>
+    </div>
+
     <script>
+        // QR Code functions
+        function openQrModal() {
+            document.getElementById('qrModal').classList.add('active');
+        }
+
+        function closeQrModal(event) {
+            if (!event || event.target.id === 'qrModal') {
+                document.getElementById('qrModal').classList.remove('active');
+            }
+        }
+
+        function downloadQr() {
+            const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://nguoibannho.onrender.com';
+            const link = document.createElement('a');
+            link.href = qrUrl;
+            link.download = 'qr-nguoibannho.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function shareQr() {
+            const shareData = {
+                title: 'NgườI bạn nhỏ AI',
+                text: 'Quét QR để trò chuyện với NgườI bạn nhỏ AI - chatbot hỗ trợ tâm lý cho học sinh',
+                url: 'https://nguoibannho.onrender.com'
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData).catch(err => {
+                    console.log('Share failed:', err);
+                    copyToClipboard();
+                });
+            } else {
+                copyToClipboard();
+            }
+        }
+
+        function copyToClipboard() {
+            const url = 'https://nguoibannho.onrender.com';
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Đã copy link vào clipboard!\n' + url);
+            }).catch(() => {
+                // Fallback cho trình duyệt cũ
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Đã copy link vào clipboard!\n' + url);
+            });
+        }
+
         // Load stats
         fetch('/api/stats')
             .then(r => r.json())
