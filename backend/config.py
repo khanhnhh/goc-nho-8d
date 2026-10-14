@@ -34,6 +34,9 @@ SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 EMAIL_FROM = os.getenv("EMAIL_FROM")
 
+# Brevo (HTTP API — dùng khi SMTP bị chặn, ví dụ Render free tier)
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+
 # App
 APP_NAME = os.getenv("APP_NAME", "Người bạn nhỏ AI")
 

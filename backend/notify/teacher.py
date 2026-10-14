@@ -1,19 +1,15 @@
 """
-Thông báo cho GVCN — email (nhiều ngườ nhận) hoặc webhook Zalo.
+Thông báo cho GVCN — email qua Brevo API (HTTP) hoặc webhook Zalo.
 """
+import asyncio
 import sys
 import httpx
-import aiosmtplib
-from email.message import EmailMessage
 from datetime import datetime, timezone, timedelta
 from backend.config import (
     TEACHER_EMAIL,
     TEACHER_EMAILS,
     TEACHER_ZALO_WEBHOOK,
-    SMTP_HOST,
-    SMTP_PORT,
-    SMTP_USER,
-    SMTP_PASSWORD,
+    BREVO_API_KEY,
     EMAIL_FROM,
     APP_NAME,
 )
@@ -43,7 +39,7 @@ def get_email_logs() -> list[dict]:
 async def notify_teacher(alert: dict):
     """
     Gửi cảnh báo khủng hoảng cho GVCN.
-    Ưu tiên: Email SMTP → Webhook Zalo → Console log.
+    Ưu tiên: Brevo API → Webhook Zalo → Console log.
     """
     # Force UTF-8 cho console Windows (cp1252 không hỗ trợ tiếng Việt + emoji)
     try:
@@ -63,37 +59,46 @@ async def notify_teacher(alert: dict):
     db_emails = await get_alert_emails()
     emails_to_send = db_emails if db_emails else TEACHER_EMAILS
 
-    # 1. Gửi email thật (nếu có SMTP config)
-    if emails_to_send and SMTP_USER and SMTP_PASSWORD:
-        for email in emails_to_send:
-            try:
-                await _send_email(alert, email)
-                print(f"[OK] Da gui email toi {email}")
-                _add_log("OK", f"Da gui email toi {email}")
-            except Exception as e:
-                print(f"[ERROR] Khong gui duoc email toi {email}: {e}")
-                _add_log("ERROR", f"Khong gui duoc email toi {email}: {e}")
+    # 1. Gửi email qua Brevo API — chạy nền, không block phản hồi
+    if emails_to_send and BREVO_API_KEY:
+        async def _send_all():
+            for email in emails_to_send:
+                try:
+                    await asyncio.wait_for(_send_brevo_email(alert, email), timeout=10.0)
+                    print(f"[OK] Da gui email toi {email}")
+                    _add_log("OK", f"Da gui email toi {email}")
+                except asyncio.TimeoutError:
+                    print(f"[ERROR] Timeout gui email toi {email}")
+                    _add_log("ERROR", f"Timeout gui email toi {email} (Brevo API mat qua 10s)")
+                except Exception as e:
+                    print(f"[ERROR] Khong gui duoc email toi {email}: {e}")
+                    _add_log("ERROR", f"Khong gui duoc email toi {email}: {e}")
+
+        asyncio.create_task(_send_all())
     elif emails_to_send:
         for email in emails_to_send:
             print(f"[MOCK] Gui email toi {email}: {alert['message']}")
             _add_log("MOCK", f"Gui email toi {email}: {alert['message']}")
-        print(f"       ⚠️  CHUA CO SMTP CONFIG — can them SMTP_USER va SMTP_PASSWORD vao file .env")
-        _add_log("MOCK", "CHUA CO SMTP CONFIG — can them SMTP_USER va SMTP_PASSWORD vao file .env")
+        print(f"       ⚠️  CHUA CO BREVO_API_KEY — can them BREVO_API_KEY vao file .env")
+        _add_log("MOCK", "CHUA CO BREVO_API_KEY — can them BREVO_API_KEY vao file .env")
 
-    # 2. Gửi webhook Zalo (nếu có URL thật)
+    # 2. Gửi webhook Zalo (nếu có URL thật) — cũng chạy nền
     if TEACHER_ZALO_WEBHOOK and TEACHER_ZALO_WEBHOOK.startswith("http"):
-        try:
-            async with httpx.AsyncClient() as client:
-                resp = await client.post(TEACHER_ZALO_WEBHOOK, json=alert, timeout=5.0)
-                if resp.status_code == 200:
-                    print(f"[OK] Da gui webhook Zalo")
-                    _add_log("OK", "Da gui webhook Zalo")
-                else:
-                    print(f"[ERROR] Webhook Zalo tra ve {resp.status_code}")
-                    _add_log("ERROR", f"Webhook Zalo tra ve {resp.status_code}")
-        except Exception as e:
-            print(f"[ERROR] Khong gui duoc webhook Zalo: {e}")
-            _add_log("ERROR", f"Khong gui duoc webhook Zalo: {e}")
+        async def _send_zalo():
+            try:
+                async with httpx.AsyncClient() as client:
+                    resp = await client.post(TEACHER_ZALO_WEBHOOK, json=alert, timeout=5.0)
+                    if resp.status_code == 200:
+                        print(f"[OK] Da gui webhook Zalo")
+                        _add_log("OK", "Da gui webhook Zalo")
+                    else:
+                        print(f"[ERROR] Webhook Zalo tra ve {resp.status_code}")
+                        _add_log("ERROR", f"Webhook Zalo tra ve {resp.status_code}")
+            except Exception as e:
+                print(f"[ERROR] Khong gui duoc webhook Zalo: {e}")
+                _add_log("ERROR", f"Khong gui duoc webhook Zalo: {e}")
+
+        asyncio.create_task(_send_zalo())
     elif TEACHER_ZALO_WEBHOOK:
         print(f"[MOCK] Gui webhook Zalo: {TEACHER_ZALO_WEBHOOK}")
         _add_log("MOCK", f"Gui webhook Zalo: {TEACHER_ZALO_WEBHOOK}")
@@ -102,36 +107,48 @@ async def notify_teacher(alert: dict):
         _add_log("MOCK", "CHUA CAU HINH Zalo webhook")
 
 
-async def _send_email(alert: dict, to_email: str):
-    """Gửi email cảnh báo qua SMTP (Gmail App Password)."""
-    msg = EmailMessage()
-    msg["Subject"] = f"🚨 [{alert['level_name']}] Cảnh báo {APP_NAME}"
-    msg["From"] = EMAIL_FROM or SMTP_USER
-    msg["To"] = to_email
-    msg.set_content(
-        f"""Cảnh báo khủng hoảng từ chatbot {APP_NAME}
+async def _send_brevo_email(alert: dict, to_email: str):
+    """Gửi email cảnh báo qua Brevo Transactional Email API."""
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "accept": "application/json",
+        "api-key": BREVO_API_KEY,
+        "content-type": "application/json",
+    }
+    payload = {
+        "sender": {
+            "name": APP_NAME,
+            "email": EMAIL_FROM or "khanhnhh209@gmail.com",
+        },
+        "to": [{"email": to_email}],
+        "subject": f"🚨 [{alert['level_name']}] Cảnh báo {APP_NAME}",
+        "htmlContent": f"""\
+<html>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e74c3c; border-radius: 8px;">
+    <h2 style="color: #e74c3c; margin-top: 0;">🚨 Cảnh báo khủng hoảng</h2>
+    <p><strong>Từ chatbot:</strong> {APP_NAME}</p>
+    <p><strong>Mức độ:</strong> {alert['level_name']} (Level {alert['level']})</p>
+    <p><strong>Session:</strong> {alert['session_id'][:12]}...</p>
+    <p><strong>Thờn gian:</strong> {alert['timestamp']} (giờ Việt Nam)</p>
+    <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;">
+    <p><strong>Nội dung cảnh báo:</strong></p>
+    <p style="background: #fdf2f2; padding: 12px; border-radius: 4px; border-left: 4px solid #e74c3c;">
+      {alert['message']}
+    </p>
+    <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;">
+    <p style="font-size: 14px; color: #666;">
+      <em>Lưu ý: Đây là cảnh báo ẩn danh. Vui lòng kiểm tra sức khỏe học sinh cả lớp,
+      không truy tìm cá nhân.</em>
+    </p>
+    <p style="font-size: 12px; color: #999; margin-bottom: 0;">
+      {APP_NAME} — Sáng kiến CN03, THCS Hưng Chính
+    </p>
+  </div>
+</body>
+</html>""",
+    }
 
-Mức độ: {alert['level_name']} (Level {alert['level']})
-Session: {alert['session_id'][:12]}...
-Thờn gian: {alert['timestamp']}
-Múi giờ: Việt Nam (UTC+7)
-
-Nội dung cảnh báo:
-{alert['message']}
-
-Lưu ý: Đây là cảnh báo ẩn danh. Vui lòng kiểm tra sức khỏe học sinh cả lớp,
-không truy tìm cá nhân.
-
----
-{APP_NAME} — Sáng kiến CN03, THCS Hưng Chính
-"""
-    )
-
-    await aiosmtplib.send(
-        msg,
-        hostname=SMTP_HOST or "smtp.gmail.com",
-        port=SMTP_PORT or 587,
-        username=SMTP_USER,
-        password=SMTP_PASSWORD,
-        start_tls=True,
-    )
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(url, headers=headers, json=payload, timeout=10.0)
+        resp.raise_for_status()

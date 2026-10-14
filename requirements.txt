@@ -7,3 +7,5 @@ aiosqlite>=0.19.0
 python-multipart>=0.0.6
 google-genai>=1.0.0
 aiosmtplib>=3.0.0
+# Brevo SDK không bắt buộc — dùng httpx gọi REST API trực tiếp
+# brevo-python>=1.0.0  # bỏ comment nếu muốn dùng SDK thay vì httpx
