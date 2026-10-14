@@ -83,6 +83,7 @@ async def _send_email(alert: dict, to_email: str):
 Mức độ: {alert['level_name']} (Level {alert['level']})
 Session: {alert['session_id'][:12]}...
 Thờn gian: {alert['timestamp']}
+Múi giờ: Việt Nam (UTC+7)
 
 Nội dung cảnh báo:
 {alert['message']}

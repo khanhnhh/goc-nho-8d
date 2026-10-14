@@ -4,7 +4,14 @@ Storage — SQLite ẩn danh, TTL 30 ngày.
 import aiosqlite
 import sqlite3
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+# Timezone Việt Nam (UTC+7)
+VN_TZ = timezone(timedelta(hours=7))
+
+def now_vn() -> datetime:
+    """Trả về datetime hiện tại theo giờ Việt Nam."""
+    return datetime.now(VN_TZ)
 from backend.config import SESSION_TTL_DAYS
 
 
@@ -79,7 +86,7 @@ async def get_or_create_session(session_id: str) -> dict:
         )
         row = await cursor.fetchone()
         
-        now = datetime.now().isoformat()
+        now = now_vn().isoformat()
         
         if row:
             # Cập nhật last_active
@@ -104,7 +111,7 @@ async def append_message(session_id: str, role: str, content: str):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
             "INSERT INTO messages (session_id, role, content, timestamp) VALUES (?, ?, ?, ?)",
-            (session_id, role, content, datetime.now().isoformat())
+            (session_id, role, content, now_vn().isoformat())
         )
         await db.commit()
 
@@ -125,7 +132,7 @@ async def log_blocked(session_id: str, reason: str):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
             "INSERT INTO blocked_logs (session_id, reason, timestamp) VALUES (?, ?, ?)",
-            (session_id, reason, datetime.now().isoformat())
+            (session_id, reason, now_vn().isoformat())
         )
         await db.commit()
 
@@ -135,7 +142,7 @@ async def log_crisis_alert(session_id: str, level: int, level_name: str, message
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
             "INSERT INTO crisis_alerts (session_id, level, level_name, message, timestamp) VALUES (?, ?, ?, ?, ?)",
-            (session_id, level, level_name, message, datetime.now().isoformat())
+            (session_id, level, level_name, message, now_vn().isoformat())
         )
         await db.commit()
 
@@ -162,7 +169,7 @@ async def get_recent_alerts(limit: int = 20) -> list[dict]:
 
 async def get_weekly_stats() -> dict:
     """Tổng hợp thống kê tuần cho dashboard GVCN."""
-    week_ago = (datetime.now() - timedelta(days=7)).isoformat()
+    week_ago = (now_vn() - timedelta(days=7)).isoformat()
     
     async with aiosqlite.connect(DB_PATH) as db:
         # Số phiên hoạt động
@@ -196,7 +203,7 @@ async def get_weekly_stats() -> dict:
 
 async def cleanup_old_sessions():
     """Xóa phiên cũ hơn TTL."""
-    cutoff = (datetime.now() - timedelta(days=SESSION_TTL_DAYS)).isoformat()
+    cutoff = (now_vn() - timedelta(days=SESSION_TTL_DAYS)).isoformat()
 
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("DELETE FROM messages WHERE session_id IN (SELECT session_id FROM sessions WHERE last_active < ?)", (cutoff,))
@@ -219,7 +226,7 @@ async def add_alert_email(email: str):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
             "INSERT OR IGNORE INTO alert_emails (email, created_at) VALUES (?, ?)",
-            (email, datetime.now().isoformat())
+            (email, now_vn().isoformat())
         )
         await db.commit()
 

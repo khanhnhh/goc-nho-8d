@@ -1,7 +1,10 @@
 """
 Lớp 4 — Cảnh báo khủng hoảng: template cố định + thông báo GVCN.
 """
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+# Timezone Việt Nam (UTC+7)
+VN_TZ = timezone(timedelta(hours=7))
 
 
 CRISIS_TEMPLATE = """Em ơi, mình rất lo cho em lúc này. Điều em đang gánh đang quá lớn để tự mình xoay xở — và KHÔNG phải lỗi của em.
@@ -26,6 +29,6 @@ def format_teacher_alert(level: int, session_id: str) -> dict:
         "level": level,
         "level_name": level_names.get(level, "Không xác định"),
         "session_id": session_id,
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(VN_TZ).isoformat(),
         "message": f"Cảnh báo mức {level} ({level_names.get(level, '')}) từ session {session_id[:8]}...",
     }
