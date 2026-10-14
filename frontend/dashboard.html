@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ngườ bạn nhỏ AI — Báo cáo tổng hợp</title>
+    <title>NgườI bạn nhỏ AI — Báo cáo tổng hợp</title>
     <link rel="stylesheet" href="/static/css/dashboard.css">
     <style>
         .email-section {
@@ -160,12 +160,24 @@
         .log-list .log-mock {
             color: #f39c12;
         }
+        .qr-section {
+            margin-top: 20px;
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .qr-code {
+            max-width: 150px;
+            height: auto;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="dashboard">
         <header>
-            <h1>📊 Ngườ bạn nhỏ AI — Báo cáo tổng hợp</h1>
+            <h1>📊 NgườI bạn nhỏ AI — Báo cáo tổng hợp</h1>
             <p class="subtitle">Báo cáo tổng hợp tuần (ẩn danh)</p>
         </header>
 
@@ -249,7 +261,11 @@
         </main>
 
         <footer>
-            <p>Ngườ bạn nhỏ AI — Phiên bản 1.0 | Sáng kiến CN03 — Nguyễn Thị Mỹ Dung, THCS Hưng Chính</p>
+            <p>NgườI bạn nhỏ AI — Phiên bản 1.0 | Sáng kiến CN03 — Nguyễn Thị Mỹ Dung, THCS Hưng Chính</p>
+            <div class="qr-section">
+                <p>Quét QR để vào trang chat:</p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://nguoibannho.onrender.com" alt="QR Code" class="qr-code">
+            </div>
         </footer>
     </div>
 

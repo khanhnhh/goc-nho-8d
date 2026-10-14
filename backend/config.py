@@ -1,6 +1,7 @@
 """
 Cấu hình dự án — đọc từ .env
 """
+import json
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -54,6 +55,9 @@ BLACKLIST_FILE = BASE_DIR / "config" / "blacklist.txt"
 # Load prompts and keywords
 with open(PROMPT_FILE, "r", encoding="utf-8") as f:
     SYSTEM_PROMPT = f.read()
+
+with open(FEW_SHOTS_FILE, "r", encoding="utf-8") as f:
+    FEW_SHOTS = json.load(f)
 
 with open(CRISIS_KEYWORDS_FILE, "r", encoding="utf-8") as f:
     CRISIS_KEYWORDS = [line.strip() for line in f if line.strip()]

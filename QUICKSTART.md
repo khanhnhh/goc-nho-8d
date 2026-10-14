@@ -1,4 +1,4 @@
-﻿# Khởi động nhanh
+# Khởi động nhanh
 
 ## Cài đặt (1 lần)
 

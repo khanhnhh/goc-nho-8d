@@ -1,4 +1,4 @@
-﻿"""
+"""
 Mock LLM thông minh - trả lời đa dạng theo ngữ cảnh hội thoại.
 """
 import random
