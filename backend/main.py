@@ -199,12 +199,18 @@ async def root():
 
 
 @app.get("/dashboard.html")
-async def dashboard():
-    """Dashboard GVCN — thống kê tuần."""
+async def dashboard_html():
+    """Dashboard GVCN — thống kê tuần (URL cũ, giữ để tương thích)."""
     return FileResponse(BASE_DIR / "frontend" / "dashboard.html")
 
 
 @app.get("/dashboard")
 async def dashboard():
-    """Dashboard cho GVCN."""
+    """Dashboard cho GVCN (URL cũ, giữ để tương thích)."""
+    return FileResponse(BASE_DIR / "frontend" / "dashboard.html")
+
+
+@app.get("/thongke")
+async def thongke():
+    """Dashboard cho GVCN — URL chính: /thongke."""
     return FileResponse(BASE_DIR / "frontend" / "dashboard.html")
